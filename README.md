@@ -1,6 +1,6 @@
 # Program One
 
-_Due May 7 at 5:00 PM_
+_Due May 7 at 4:00 PM_
 
 In this assignment, you will investigate [Bloom filters][bf].  Bloom filters are
 data structures that represent sets  and allow the user to query whether a given
