@@ -10,9 +10,9 @@ class BloomFilter {
   int k; // The number of hash functions
   int m; // The number or bits
 
-  IntegerHash* intfn;  // The function used to hash strings to integers
-  StringHash** strfns; // The functions used to map those integers to bit indices
-  uint64_t*    bits;   // The bits themselves
+  StringHash*   strfn;  // The function used to hash strings to integers
+  IntegerHash** intfns; // The functions used to map those integers to bit indices
+  uint64_t*     bits;   // The bits themselves
 
 public:
   BloomFilter(int k, int m, std::string intfn, std::string strfn);

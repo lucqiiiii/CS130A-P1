@@ -23,10 +23,13 @@ void usage() {
   std::cerr << "  -v      Increase verbosity (may be repeated).\n";
 }
 
-int parseint(char opt, const char* arg) {
+int parseint(char opt, std::string arg) {
   try {
-    int result = std::stoi(arg);
-    if(result > 0) return result;
+    size_t index;
+    int result = std::stoi(arg, &index);
+    if(index == arg.length() && result > 0) {
+      return result;
+    }
   }
   catch(std::exception&) {
     // Fall through.
@@ -38,7 +41,7 @@ int parseint(char opt, const char* arg) {
 }
 
 std::string color(std::string text, int code, bool c) {
-  if(c) return "\e" + std::to_string(code) + "m" + text + "\e0m";
+  if(c) return "\e[" + std::to_string(code) + "m" + text + "\e[0m";
   return text;
 }
 
@@ -47,8 +50,8 @@ int main(int argc, char** argv) {
   const char* s = "jenkins";
 
   bool c = true;
-  int  k = 0;
-  int  m = 0;
+  int  k = 5;
+  int  m = 20;
   int  n = 0;
   bool t = false;
   int  v = 0;
@@ -172,7 +175,7 @@ int main(int argc, char** argv) {
   check.close();
 
   // Summarize the results
-  if(t) {
+  if(!t) {
     std::cout << "Inserted " << nstores << " items.\n";
     std::cout << "Looked up " << nchecks << " items.\n";
     std::cout << " - True Positives:  " << color(std::to_string(tpos), 32, c) << '\n';

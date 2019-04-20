@@ -9,15 +9,18 @@
 // and reduce their output to the correct range.
 
 // The variable m is the size of the table.  The variable i is the
-// index of the hash function within a bloom filter, which makes sure
+// index of the hash function within a Bloom filter, which makes sure
 // the hash functions behave differently.  A Bloom filter with k hash
 // functions will have functions with indices 0, 1, 2, ..., k-1.
 
 class IntegerHash {
+protected:
   uint64_t i;
   uint64_t m;
 public:
   IntegerHash(uint64_t i, uint64_t m);
+  virtual ~IntegerHash() {}
+
   virtual uint64_t hash(uint64_t input) const = 0;
 };
 

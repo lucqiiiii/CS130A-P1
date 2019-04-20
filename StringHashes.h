@@ -11,12 +11,12 @@
 
 class StringHash {
 public:
+  virtual ~StringHash() {}
   virtual uint64_t hash(const std::string& input) const = 0;
 };
 
 class JenkinsHash: public StringHash {
   // This implements Bob Jenkins' "one at a time" hash function
-  // It uses 64 bits of internal state rather than the original 32
 public:
   uint64_t hash(const std::string& input) const;
 };
