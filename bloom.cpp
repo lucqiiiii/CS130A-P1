@@ -9,13 +9,21 @@
 void usage() {
   std::cerr << "USAGE: ./bloom [options] <file-to-store> <file-to-check>\n";
   std::cerr << "  -c      Disable coloration of the output.\n";
+  std::cerr << "  -i <I>  Use method I to hash (reduce) integers.  Methods are:\n";
+  std::cerr << "            division   - use the division method\n";
+  std::cerr << "            reciprocal - use the multiplication method with fractions\n";
+  std::cerr << "            squareroot - use the multiplication method with square roots\n";
   std::cerr << "  -k <K>  Use K hash functions in the Bloom filter.\n";
   std::cerr << "  -m <M>  Use M bits in the Bloom filter.\n";
   std::cerr << "  -n <N>  Insert only the first N lines of file-to-store.\n";
+  std::cerr << "  -s <S>  Use method S to hash strings to integers.  Methods are:\n";
+  std::cerr << "            jenkins - use Jenkins' one-at-a-time hashing\n";
+  std::cerr << "            pearson - use 8-bit Pearson hashing\n";
+  std::cerr << "  -t      Print the summary in tabular (CSV) format.\n";
   std::cerr << "  -v      Increase verbosity (may be repeated).\n";
 }
 
-int positive(char opt, const char* arg) {
+int parseint(char opt, const char* arg) {
   try {
     int result = std::stoi(arg);
     if(result > 0) return result;
@@ -35,26 +43,39 @@ std::string color(std::string text, int code, bool c) {
 }
 
 int main(int argc, char** argv) {
+  const char* i = "squareroot";
+  const char* s = "jenkins";
+
   bool c = true;
   int  k = 0;
   int  m = 0;
   int  n = 0;
+  bool t = false;
   int  v = 0;
   int  opt;
 
-  while((opt = getopt(argc, argv, "ck:m:n:v")) != -1) {
+  while((opt = getopt(argc, argv, "ci:k:m:n:s:tv")) != -1) {
     switch(opt) {
     case 'c':
       c = false;
       break;
+    case 'i':
+      i = optarg;
+      break;
     case 'k':
-      k = positive('k', optarg);
+      k = parseint('k', optarg);
       break;
     case 'm':
-      m = positive('m', optarg);
+      m = parseint('m', optarg);
       break;
     case 'n':
-      n = positive('n', optarg);
+      n = parseint('n', optarg);
+      break;
+    case 's':
+      s = optarg;
+      break;
+    case 't':
+      t = true;
       break;
     case 'v':
       v += 1;
@@ -69,7 +90,11 @@ int main(int argc, char** argv) {
     }
   }
 
-  // TODO: Check positional arguments.
+ if(optind != argc - 2) {
+    std::cerr << "Exactly two filenames are required.\n\n";
+    usage();
+    exit(1);
+  }
 
   const std::string ADDL = "[" + color("INSERT", 34, c) + "] ";
   const std::string TPOS = "[" + color("T. POS", 32, c) + "] ";
@@ -77,20 +102,21 @@ int main(int argc, char** argv) {
   const std::string FPOS = "[" + color("F. POS", 33, c) + "] ";
   const std::string FNEG = "[" + color("F. NEG", 31, c) + "] ";
 
-  int count = 0;
   std::string line;
-  BloomFilter filter(k, m);
+  BloomFilter filter(k, m, s, i);
   HashSet hashset;
 
+  int nstores = 0;
+  int nchecks = 0;
   int tpos = 0;
   int tneg = 0;
   int fpos = 0;
   int fneg = 0;
 
   // Insert lines from file-to-store
-  std::ifstream store(argv[1]);
+  std::ifstream store(argv[optind]);
   if(store.fail()) {
-    std::cerr << "Unable to open file: " << argv[1] << '\n';
+    std::cerr << "Unable to open file: " << argv[optind] << '\n';
     exit(1);
   }
 
@@ -99,26 +125,26 @@ int main(int argc, char** argv) {
     hashset.insert(line);
     filter.insert(line);
 
-    count += 1;
-    if(count == n) {
+    nstores += 1;
+    if(nstores == n) {
       break;
     }
   }
 
   if(v > 1) std::cout << '\n';
-  std::cout << "Inserted " << count << " items.\n\n";
   store.close();
 
   // Look up lines from file-to-check
-  std::ifstream check(argv[2]);
+  std::ifstream check(argv[optind+1]);
   if(check.fail()) {
-    std::cerr << "Unable to open file: " << argv[2] << '\n';
+    std::cerr << "Unable to open file: " << argv[optind+1] << '\n';
     exit(1);
   }
 
   while(std::getline(check, line)) {
     bool sfound = hashset.lookup(line);
     bool ffound = filter.lookup(line);
+    nchecks += 1;
 
     if(sfound) {
       if(ffound) {
@@ -146,9 +172,22 @@ int main(int argc, char** argv) {
   check.close();
 
   // Summarize the results
-  std::cout << "True Positives:  " << color(std::to_string(tpos), 32, c) << '\n';
-  std::cout << "True Negatives:  " << color(std::to_string(tneg), 36, c) << '\n';
-  std::cout << "False Positives: " << color(std::to_string(fpos), 33, c) << '\n';
-  std::cout << "False Negatives: " << color(std::to_string(fneg), 31, c) << '\n';
+  if(t) {
+    std::cout << "Inserted " << nstores << " items.\n";
+    std::cout << "Looked up " << nchecks << " items.\n";
+    std::cout << " - True Positives:  " << color(std::to_string(tpos), 32, c) << '\n';
+    std::cout << " - True Negatives:  " << color(std::to_string(tneg), 36, c) << '\n';
+    std::cout << " - False Positives: " << color(std::to_string(fpos), 33, c) << '\n';
+    std::cout << " - False Negatives: " << color(std::to_string(fneg), 31, c) << '\n';
+  }
+  else {
+    std::cout << nstores << ',';
+    std::cout << nchecks << ',';
+    std::cout << tpos << ',';
+    std::cout << tneg << ',';
+    std::cout << fpos << ',';
+    std::cout << fneg << '\n';
+  }
+
   return 0;
 }

@@ -48,7 +48,8 @@ other parameters at their default values.  Explain your observations.
 
 Use the same data that you used for the final question in Homework Two, that is,
 the  `primaryName`  column  from the IMDb  `name.basics`  dataset,  available at
-<https://datasets.imdbws.com/>.
+<https://datasets.imdbws.com/>.  Use the  entire name  as the key  (not just the
+last eight bytes, as in the homework).
 
 - The parameter _k_ controls the number of hash functions used.  Try setting _k_
   to values between TODO and TODO with the `-k` option.
@@ -61,17 +62,20 @@ the  `primaryName`  column  from the IMDb  `name.basics`  dataset,  available at
 
 ## Miscellaneous
 
+- This is an individual assignment.  No group work!
+- Your code must compile with no warnings (the `-Werror` flag enforces this).
 - You may not use global variables or any data structures from other libraries.
 - Do not edit  `bloom.cpp`  or any of the `*.h` files;  your code will be tested
   against the originals.
-- The summary that gets printed includes false negatives; this may be useful for
-  debugging,  but if your  Bloom filter  is working properly,  this number  will
-  always be zero.
+- The summary includes false negatives; this may be useful for debugging, but if
+  your code is working properly, this number will always be zero.
 - The  starter code  operates on entire lines,  but the IMDb data  contains more
   than just names on each line.  You'll need to preprocess your data set so that
-  you only work with names; the `cut` command should be helpful here.  And don't
+  you only work with names;  the  `cut`  command  should be helpful here.  Don't
   forget to remove the header row!
-- False positive rates should be given as percentages.
+- [False positive rates][fp]  should be given as percentages:  the percentage of
+  all items not in the set that were incorrectly reported as in the set.
 
 
 [bf]: https://en.wikipedia.org/wiki/Bloom_filter
+[fp]: https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers

@@ -1,14 +1,16 @@
 #ifndef HASHSET_H
 #define HASHSET_H
 
-#include "HashFunctions.h"
+#include "IntegerHashes.h"
+#include "StringHashes.h"
 #include <string>
 
 class HashSet {
   int           nitems; // The number of items in the set
   int           nslots; // The number of slots in the table
-  HashFunction* hashfn; // The hash function to use for inserts
-  HashFunction* stepfn; // The hash function to use for probing (if you do double hashing)
+  IntegerHash*  intfn;  // The integer hash function to use
+  StringHash*   strfn;  // The string hash function to use
+  StringHash*   strfn2; // The hash function to use for probing (if you do double hashing)
   std::string** slots;  // The slots themselves
 
   void rehash();
