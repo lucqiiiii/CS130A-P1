@@ -7,17 +7,21 @@
 #include <unistd.h>
 
 void usage() {
-  std::cerr << "USAGE: ./bloom [options] <file-to-store> <file-to-check>\n";
+  std::cerr << "USAGE: ./bloom [options] <file1> [file2]\n\n";
+  std::cerr << "If two file names are given, all lines from the first file are inserted and all lines from the second file are looked up.\n";
+  std::cerr << "If only one file name is given, the first 1,000 lines are inserted and then all lines are looked up.\n\n";
+  std::cerr << "Available options:\n";
   std::cerr << "  -c      Disable coloration of the output.\n";
+  std::cerr << "  -f      Print only the false positive rate (overrides -t).\n";
   std::cerr << "  -i <I>  Use method I to hash (reduce) integers.  Methods are:\n";
   std::cerr << "            division   - use the division method\n";
   std::cerr << "            reciprocal - use the multiplication method with fractions\n";
-  std::cerr << "            squareroot - use the multiplication method with square roots\n";
-  std::cerr << "  -k <K>  Use K hash functions in the Bloom filter.\n";
-  std::cerr << "  -m <M>  Use M bits in the Bloom filter.\n";
-  std::cerr << "  -n <N>  Insert only the first N lines of file-to-store.\n";
+  std::cerr << "            squareroot - use the multiplication method with square roots (default)\n";
+  std::cerr << "  -k <K>  Use K hash functions in the Bloom filter (default = 10).\n";
+  std::cerr << "  -m <M>  Use M bits in the Bloom filter (default = 15,000).\n";
+  std::cerr << "  -n <N>  Insert at most N lines from file1.\n";
   std::cerr << "  -s <S>  Use method S to hash strings to integers.  Methods are:\n";
-  std::cerr << "            jenkins - use Jenkins' one-at-a-time hashing\n";
+  std::cerr << "            jenkins - use Jenkins' one-at-a-time hashing (default)\n";
   std::cerr << "            pearson - use 8-bit Pearson hashing\n";
   std::cerr << "  -t      Print the summary in tabular (CSV) format.\n";
   std::cerr << "  -v      Increase verbosity (may be repeated).\n";
@@ -50,17 +54,21 @@ int main(int argc, char** argv) {
   const char* s = "jenkins";
 
   bool c = true;
-  int  k = 5;
-  int  m = 20;
+  bool f = false;
+  int  k = 10;
+  int  m = 15000;
   int  n = 0;
   bool t = false;
   int  v = 0;
   int  opt;
 
-  while((opt = getopt(argc, argv, "ci:k:m:n:s:tv")) != -1) {
+  while((opt = getopt(argc, argv, "cfi:k:m:n:s:tv")) != -1) {
     switch(opt) {
     case 'c':
       c = false;
+      break;
+    case 'f':
+      f = true;
       break;
     case 'i':
       i = optarg;
@@ -93,8 +101,20 @@ int main(int argc, char** argv) {
     }
   }
 
- if(optind != argc - 2) {
-    std::cerr << "Exactly two filenames are required.\n\n";
+  const char* storefile;
+  const char* checkfile;
+
+  if(optind == argc - 2) {
+    storefile = argv[optind];
+    checkfile = argv[optind + 1];
+  }
+  else if(optind == argc - 1) {
+    if(n == 0) n = 1000;
+    storefile = argv[optind];
+    checkfile = argv[optind];
+  }
+  else {
+    std::cerr << "Exactly one or two filenames are required.\n\n";
     usage();
     exit(1);
   }
@@ -116,10 +136,10 @@ int main(int argc, char** argv) {
   int fpos = 0;
   int fneg = 0;
 
-  // Insert lines from file-to-store
-  std::ifstream store(argv[optind]);
+  // Insert lines from storefile
+  std::ifstream store(storefile);
   if(store.fail()) {
-    std::cerr << "Unable to open file: " << argv[optind] << '\n';
+    std::cerr << "Unable to open file: " << storefile << '\n';
     exit(1);
   }
 
@@ -137,10 +157,10 @@ int main(int argc, char** argv) {
   if(v > 1) std::cout << '\n';
   store.close();
 
-  // Look up lines from file-to-check
-  std::ifstream check(argv[optind+1]);
+  // Look up lines from checkfile
+  std::ifstream check(checkfile);
   if(check.fail()) {
-    std::cerr << "Unable to open file: " << argv[optind+1] << '\n';
+    std::cerr << "Unable to open file: " << checkfile << '\n';
     exit(1);
   }
 
@@ -175,21 +195,24 @@ int main(int argc, char** argv) {
   check.close();
 
   // Summarize the results
-  if(!t) {
-    std::cout << "Inserted " << nstores << " items.\n";
-    std::cout << "Looked up " << nchecks << " items.\n";
-    std::cout << " - True Positives:  " << color(std::to_string(tpos), 32, c) << '\n';
-    std::cout << " - True Negatives:  " << color(std::to_string(tneg), 36, c) << '\n';
-    std::cout << " - False Positives: " << color(std::to_string(fpos), 33, c) << '\n';
-    std::cout << " - False Negatives: " << color(std::to_string(fneg), 31, c) << '\n';
+  if(f) {
+    std::cout << double(fpos) / (fpos + tneg) << '\n';
   }
-  else {
+  else if(t) {
     std::cout << nstores << ',';
     std::cout << nchecks << ',';
     std::cout << tpos << ',';
     std::cout << tneg << ',';
     std::cout << fpos << ',';
     std::cout << fneg << '\n';
+  }
+  else {
+    std::cout << "Inserted " << nstores << " items.\n";
+    std::cout << "Looked up " << nchecks << " items.\n";
+    std::cout << " - True Positives:  " << color(std::to_string(tpos), 32, c) << '\n';
+    std::cout << " - True Negatives:  " << color(std::to_string(tneg), 36, c) << '\n';
+    std::cout << " - False Positives: " << color(std::to_string(fpos), 33, c) << '\n';
+    std::cout << " - False Negatives: " << color(std::to_string(fneg), 31, c) << '\n';
   }
 
   return 0;

@@ -1,5 +1,7 @@
 # Program One
 
+_Due May 7 at 5:00 PM_
+
 In this assignment, you will investigate [Bloom filters][bf].  Bloom filters are
 data structures that represent sets  and allow the user to query whether a given
 item is a member of the set or not. They use hash functions and a clever storage
@@ -22,12 +24,11 @@ write a short report on your findings.
 
 ## Part One: The Code
 
-This repo contains starter code that compares a Bloom filter against a true set.
-It takes  two filenames  on the command line  as parameters.  Each line from the
-first file is inserted. Each line from the second file is looked up.  A hash set
-is used as a baseline to report each lookup as a true negative,  false positive,
-etc.  The starter code will handle the testing logic, input, and output for you,
-but you'll need to implement the data structures yourself:
+This repo contains starter code that compares a Bloom filter against a hash set,
+which  is used  as a baseline  to report  each  Bloom  filter  lookup  as a true
+negative,  false positive, etc.  The starter code will handle the testing logic,
+input,  and output  for you,  but you'll need  to implement the  data structures
+and hash functions yourself:
 
 - You'll find the `BloomFilter` class declared in `BloomFilter.h`;  implement it
   in `BloomFilter.cpp`.
@@ -35,29 +36,42 @@ but you'll need to implement the data structures yourself:
   will be compared against. Implement it in `HashSet.cpp`. Note that it's a set,
   not a map, and that you only need to implement insertion and lookup.  Use open
   address hashing with a hash function and probing scheme of your choice.
-- The `HashFunctions.h` header file contains class declarations for a variety of
-  hash functions.  Implement these in `HashFunctions.cpp`.
+- The  `StringHashes.h`  header file contains  class declarations  for functions
+  used to map  arbitrary-length strings  to integers.  The comments in that file
+  explain the functions used.  Implement these in `StringHashes.cpp`.
+- The `IntegerHashes.h` file contains class declarations for hash functions that
+  map arbitrary integers to integers in a given range (for use in a Bloom filter
+  or hash table). The comments explain how each function works.  Implement these
+  in `IntegerHashes.cpp`.
+
+Turn in your code  on Gradescope.  The automated tests  will make sure that your
+code behaves as expected.  You will also be graded on coding style.
 
 
 ## Part Two: The Report
 
-Use the program  you just completed  to observe the effects of  the Bloom filter
-parameters  on the false positive rate.  For each parameter listed below,  graph
-the false positive rate  of each hash function  over the range given.  Leave all
-other parameters at their default values.  Explain your observations.
+Now that you have a working Bloom filter, you can experiment with its parameters
+and see how the  [false positive rate][fp]  changes.  For all six  (string hash,
+integer hash)  pairs,  perform the experiments  listed below.  Graph and explain
+your results.
 
-Use the same data that you used for the final question in Homework Two, that is,
-the  `primaryName`  column  from the IMDb  `name.basics`  dataset,  available at
-<https://datasets.imdbws.com/>.  Use the  entire name  as the key  (not just the
-last eight bytes, as in the homework).
+You'll need a dataset to perform these experiments; a dataset with about 100,000
+unique strings  should give you good results  and still run quickly.  The  [IMDb
+datasets][db] are a good option, but you'll want to preprocess them to extract a
+single column, remove duplicates, and extract a subset of the desired size.
 
-- The parameter _k_ controls the number of hash functions used.  Try setting _k_
-  to values between TODO and TODO with the `-k` option.
-- The parameter _m_ controls the number of bits in the Bloom filter. Try setting
-  _m_ to values between TODO and TODO with the `-m` option.
-- The parameter _n_  represents  the number of items  in the set.  Use the  `-n`
-  option to control how many lines are inserted.  Try values of _n_ between TODO
-  and TODO.
+- The parameter  _n_  represents  the number of items  in the set.  Take a Bloom
+  filter with _m_ = 1,000 and _k_ = 10. How does its false positive rate  change
+  as _n_ varies from 1 to 1,000?
+- The parameter _m_ controls the number of bits in the Bloom filter. Take a very
+  "full" Bloom filter with _m_ = 10, _k_ = 10, and _n_ = 10. How does increasing
+  _m_ change the false positive rate?
+- The parameter _k_  controls the number  of hash  functions used.  Take a Bloom
+  filter with _m_ = 100,000 and _n_ = 10,000.  How does the  false positive rate
+  change as _k_ varies from 1 to 100?
+
+Make sure your report mentions what data set you used and gives an evaluation of
+the hash functions.  Turn it in on Gradescope.
 
 
 ## Miscellaneous
@@ -69,13 +83,11 @@ last eight bytes, as in the homework).
   against the originals.
 - The summary includes false negatives; this may be useful for debugging, but if
   your code is working properly, this number will always be zero.
-- The  starter code  operates on entire lines,  but the IMDb data  contains more
-  than just names on each line.  You'll need to preprocess your data set so that
-  you only work with names;  the  `cut`  command  should be helpful here.  Don't
-  forget to remove the header row!
-- [False positive rates][fp]  should be given as percentages:  the percentage of
-  all items not in the set that were incorrectly reported as in the set.
+- The starter code has `-t` and `-f` flags, which are intended to make it easier
+  to to script your experiments  and create  CSV  or  TSV  files.  The `cut` and
+  `paste` command line tools will be useful if you do this!
 
 
 [bf]: https://en.wikipedia.org/wiki/Bloom_filter
 [fp]: https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers
+[db]: https://datasets.imdbws.com/
