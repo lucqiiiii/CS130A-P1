@@ -15,7 +15,7 @@ class BloomFilter {
   uint64_t*     bits;   // The bits themselves
 
 public:
-  BloomFilter(int k, int m, std::string intfn, std::string strfn);
+  BloomFilter(int k, int m, std::string strfn, std::string intfn);
   ~BloomFilter();
 
   void insert(const std::string& value);
