@@ -26,9 +26,6 @@ void HashSet::insert(const std::string& value){
   while(slots[key] != NULL && *(slots[key]) != value){
     key++;
   }
-  if(key > nslots){
-    rehash();
-  }
   if(slots[key] == NULL){
     *(slots[key]) = value;
     nitems++;
