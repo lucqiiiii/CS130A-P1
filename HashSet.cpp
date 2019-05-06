@@ -58,4 +58,5 @@ void HashSet::rehash(){
   }
   delete oldslots;
   nslots = 2 * nslots; 
+  this -> intfn = new SquareRootHash(1,nslots);
 } 
