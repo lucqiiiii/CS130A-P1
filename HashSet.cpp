@@ -23,17 +23,14 @@ HashSet::~HashSet(){
 
 void HashSet::insert(const std::string& value){
   uint64_t key = intfn -> hash(strfn -> hash(value));
-  while(slots[key] != NULL && *(slots[key]) != value){
+  while(slots[key] != NULL){
     key++;
   }
   if(slots[key] == NULL){
     slots[key] = new std::string(value);
     nitems++;
   }
-  else if(*(slots[key]) == value){
-    return;
-  }
-  if(nitems == nslots){
+  if(static_cast<double>(nitems/nslots) == 0.7){
     rehash();
   }
 }
