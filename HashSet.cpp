@@ -19,7 +19,7 @@ HashSet::~HashSet(){
   for(int i = 0; i < nslots; i++){
     delete slots[i];
   }
-  delete slots;
+  delete []slots;
   delete strfn;
   delete intfn;
 }
@@ -27,31 +27,26 @@ HashSet::~HashSet(){
 void HashSet::insert(const std::string& value){
   uint64_t key = intfn -> hash(strfn -> hash(value));
   while(slots[key] != NULL){
-    key++;
+    key = (key + 1) % nslots;
   }
   if(slots[key] == NULL){
     slots[key] = new std::string(value);
     nitems++;
   }
-  if(static_cast<double>(nitems/nslots) == 0.7){
+  if(static_cast<double>(nitems)/nslots >= 0.7){
     rehash();
   }
 }
 
 bool HashSet::lookup(const std::string& value) const{
   uint64_t key = intfn -> hash(strfn -> hash(value));
-  if(*(slots[key]) == value){
-    return true;
-  }
-  else{
-    while(slots[key] != NULL){
-      if(*(slots[key]) == value){
-        return true;
-      }
-      key++;
+  while(slots[key] != NULL){
+    if(*(slots[key]) == value){
+      return true;
     }
-    return false;
+    key = (key + 1) % nslots;
   }
+  return false;
 }
 
 void HashSet::rehash(){
@@ -59,9 +54,15 @@ void HashSet::rehash(){
   slots = new std::string*[nslots*2]();
   this -> intfn = new SquareRootHash(1,nslots*2);
   for(int i = 0; i < nslots; i++){
-    uint64_t new_key = intfn -> hash(strfn -> hash(*(oldslots[i])));
-    slots[new_key] = new std::string(*(oldslots[i]));
-    delete oldslots[i];
+    if(oldslots[i] != NULL){
+      uint64_t new_key = intfn -> hash(strfn -> hash(*(oldslots[i])));
+      while(slots[new_key] != NULL){
+        new_key = (new_key + 1) % (nslots*2);
+      }
+      if(slots[new_key] == NULL){
+        slots[new_key] = oldslots[i];
+      }
+    }
   }
   delete oldslots;
   nslots = 2 * nslots; 
