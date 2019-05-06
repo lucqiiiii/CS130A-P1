@@ -13,7 +13,9 @@ HashSet::HashSet(){
 }
 
 HashSet::~HashSet(){
-  delete [](*slots);
+  for(int i = 0; i < nslots; i++){
+    delete slots[i];
+  }
   delete slots;
   delete strfn;
   delete intfn;
