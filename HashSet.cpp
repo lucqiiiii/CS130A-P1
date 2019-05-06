@@ -64,6 +64,6 @@ void HashSet::rehash(){
       }
     }
   }
-  delete oldslots;
+  delete []oldslots;
   nslots = 2 * nslots; 
 } 
