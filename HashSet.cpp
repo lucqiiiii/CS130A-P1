@@ -50,6 +50,7 @@ bool HashSet::lookup(const std::string& value) const{
 void HashSet::rehash(){
   std::string** oldslots = slots;
   slots = new std::string*[nslots*2]();
+  delete intfn;
   this -> intfn = new SquareRootHash(1,nslots*2);
   for(int i = 0; i < nslots; i++){
     if(oldslots[i] != NULL){
