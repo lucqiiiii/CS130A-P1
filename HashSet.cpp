@@ -40,13 +40,18 @@ void HashSet::insert(const std::string& value){
 
 bool HashSet::lookup(const std::string& value) const{
   uint64_t key = intfn -> hash(strfn -> hash(value));
-  while(slots[key] != NULL){
-    if(*(slots[key]) == value){
-      return true;
-    }
-    key++;
+  if(*(slots[key]) == value){
+    return true;
   }
-  return false;
+  else{
+    while(slots[key] != NULL){
+      if(*(slots[key]) == value){
+        return true;
+      }
+      key++;
+    }
+    return false;
+  }
 }
 
 void HashSet::rehash(){
