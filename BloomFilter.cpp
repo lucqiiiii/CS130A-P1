@@ -37,7 +37,9 @@ BloomFilter::BloomFilter(int k, int m, std::string strfn, std::string intfn){
 BloomFilter::~BloomFilter(){
   delete []bits;
   delete strfn;
-  delete [](*intfns);
+  for(int i = 0; i < k; i++){
+    delete intfns[i];
+  }
   delete intfns;
 }
 
