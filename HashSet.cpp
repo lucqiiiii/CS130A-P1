@@ -48,11 +48,12 @@ bool HashSet::lookup(const std::string& value) const{
 }
 
 void HashSet::rehash(){
-  string* oldslots = *slots;
-  slots = new vector<string*>(nslots*2,0);
+  string** oldslots = slots;
+  slots = new std::string*[nslots*2];
   for(int i = 0; i < nslots; i++){
-    *(slots[i]) = oldslots[i];
+    *(slots[i]) = *(oldslots[i]);
   }
-  delete []oldslots;
+  delete [](*oldslots);
+  delete oldslots;
   nslots = 2 * nslots; 
 } 
