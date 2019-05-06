@@ -4,7 +4,7 @@
 #include "IntegerHashes.h"
 #include "StringHashes.h"
 
-BloomFilter::BloomFilter(int k, int m, string strfn, string intfn){
+BloomFilter::BloomFilter(int k, int m, std::string strfn, std::string intfn){
   this -> k = k;
   this -> m = m;
   if(strfn == "jenkins"){
