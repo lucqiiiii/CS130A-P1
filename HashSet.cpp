@@ -8,6 +8,9 @@ HashSet::HashSet(){
   this -> nitems = 0;
   this -> nslots = 101;
   slots = new std::string*[nslots];
+  for(int i = 0; i < nslots; i++){
+    slots[i] = NULL;
+  }
   this -> strfn = new JenkinsHash();
   this -> intfn = new SquareRootHash(1,nslots);
 }
@@ -56,9 +59,9 @@ void HashSet::rehash(){
   slots = new std::string*[nslots*2];
   for(int i = 0; i < nslots; i++){
     *(slots[i]) = *(oldslots[i]);
-   // delete oldslots[i];
+    delete oldslots[i];
   }
- // delete oldslots;
+  delete oldslots;
   nslots = 2 * nslots; 
   this -> intfn = new SquareRootHash(1,nslots);
 } 
