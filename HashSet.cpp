@@ -48,7 +48,7 @@ bool HashSet::lookup(const std::string& value) const{
 }
 
 void HashSet::rehash(){
-  string** oldslots = slots;
+  std::string** oldslots = slots;
   slots = new std::string*[nslots*2];
   for(int i = 0; i < nslots; i++){
     *(slots[i]) = *(oldslots[i]);
