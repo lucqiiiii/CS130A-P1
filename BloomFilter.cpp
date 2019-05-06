@@ -14,45 +14,45 @@ BloomFilter::BloomFilter(int k, int m, std::string strfn, std::string intfn){
     this -> strfn = new PearsonHash();
   }
   if(intfn == "division"){
-    this -> intfn = new DivisionHash*[k];
+    this -> intfns = new DivisionHash*[k];
     for(int i = 0; i < k; i++){
-      intfn[i] = new DivisionHash(i,m);
+      intfns[i] = new DivisionHash(i,m);
     }
   }
   else if(intfn == "reciprocal"){
-    this -> intfn = new ReciprocalHash*[k];
+    this -> intfns = new ReciprocalHash*[k];
     for(int i = 0; i < k; i++){
-      intfn[i] = new ReciprocalHash(i,m);
+      intfns[i] = new ReciprocalHash(i,m);
     }
   }
   else if(intfn == "squareroot"){
-    this -> intfn = new SquareRootHash*[k];
+    this -> intfns = new SquareRootHash*[k];
     for(int i = 0; i < k; i++){
-      intfn[i] = new SquareRootHash(i,m);
+      intfns[i] = new SquareRootHash(i,m);
     }
   }
-  bits = new vector<uint64_t>(m,0);
+  bits = new std::vector<uint64_t>(m,0);
 }
 
 BloomFilter::~BloomFilter(){
   delete []bits;
   delete strfn;
-  delete [](*intfn);
-  delete intfn;
+  delete [](*intfns);
+  delete intfns;
 }
 
-void BloomFilter::insert(const string& value){
+void BloomFilter::insert(const std::string& value){
   uint64_t key;
   for(int i = 0; i < k; i++){
-    key = intfn[i] -> hash(strfn -> hash(value));
+    key = intfns[i] -> hash(strfn -> hash(value));
     bits[key/64] |= (1 << (key % 64));
   }
 }
 
-bool BloomFilter::lookup(const string& value) const{
+bool BloomFilter::lookup(const std::string& value) const{
   uint64_t key;
   for(int i = 0; i < k; i++){
-    key = intfn[i] -> hash(strfn -> hash(value));
+    key = intfns[i] -> hash(strfn -> hash(value));
     if((bits[key/64] &= (1 << (key % 64))) != 1){
       return false;
     }
