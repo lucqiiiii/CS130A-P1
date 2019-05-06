@@ -55,7 +55,7 @@ bool BloomFilter::lookup(const std::string& value) const{
   uint64_t key;
   for(int i = 0; i < k; i++){
     key = intfns[i] -> hash(strfn -> hash(value));
-    if((bits[key/64] &= (uint64_t(1) << (key % 64))) != 1){
+    if((bits[key/64] &= (uint64_t(1) << (key % 64))) != uint64_t(1)){
       return false;
     }
   }
