@@ -7,9 +7,9 @@
 HashSet::HashSet(){
   this -> nitems = 0;
   this -> nslots = 101;
-  slots = new vector<string*>(nslots,0);
+  slots = new std::string*[nslots];
   this -> strfn = new JenkinsHash();
-  this -> intfn = new SquareRootHash();
+  this -> intfn = new SquareRootHash(1,nslots);
 }
 
 HashSet::~HashSet(){
