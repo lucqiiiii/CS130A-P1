@@ -23,20 +23,18 @@ HashSet::~HashSet(){
 
 void HashSet::insert(const std::string& value){
   uint64_t key = intfn -> hash(strfn -> hash(value));
-  while(slots[key] != NULL && *(slots[key]) != value && nitems < nslots){
+  while(slots[key] != NULL && *(slots[key]) != value){
     key++;
   }
-  if(*(slots[key]) == value){
-    return;
-  }
   if(slots[key] == NULL){
-    *slots[key] = value;
+    *(slots[key]) = value;
     nitems++;
+  }
+  else if(*(slots[key]) == value){
+    return;
   }
   if(nitems == nslots){
     rehash();
-    *slots[key] = value;
-    nitems++;
   }
 }
 
