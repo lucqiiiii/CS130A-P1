@@ -60,7 +60,7 @@ void HashSet::rehash(){
   this -> intfn = new SquareRootHash(1,nslots*2);
   for(int i = 0; i < nslots; i++){
     uint64_t new_key = intfn -> hash(strfn -> hash(*(oldslots[i])));
-    slots[new_key] = *(oldslots[i]);
+    slots[new_key] = new std::string(*(oldslots[i]));
     delete oldslots[i];
   }
   delete oldslots;
