@@ -56,12 +56,13 @@ bool HashSet::lookup(const std::string& value) const{
 
 void HashSet::rehash(){
   std::string** oldslots = slots;
-  slots = new std::string*[nslots*2];
+  slots = new std::string*[nslots*2]();
+  this -> intfn = new SquareRootHash(1,nslots*2);
   for(int i = 0; i < nslots; i++){
-    *(slots[i]) = *(oldslots[i]);
+    uint64_t new_key = intfn -> hash(strfn -> hash(*(oldslots[i])));
+    slots[new_key] = *(oldslots[i]);
     delete oldslots[i];
   }
   delete oldslots;
   nslots = 2 * nslots; 
-  this -> intfn = new SquareRootHash(1,nslots);
 } 
