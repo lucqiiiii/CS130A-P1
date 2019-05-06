@@ -31,7 +31,7 @@ BloomFilter::BloomFilter(int k, int m, std::string strfn, std::string intfn){
       intfns[i] = new SquareRootHash(i,m);
     }
   }
-  bits = new std::vector<uint64_t>(m,0);
+  this -> bits = new uint64_t[m];
 }
 
 BloomFilter::~BloomFilter(){
