@@ -27,7 +27,7 @@ void HashSet::insert(const std::string& value){
     key++;
   }
   if(slots[key] == NULL){
-    *(slots[key]) = value;
+    slots[key] = new std::string(value);
     nitems++;
   }
   else if(*(slots[key]) == value){
